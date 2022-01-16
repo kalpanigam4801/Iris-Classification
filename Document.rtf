@@ -1,0 +1,357 @@
+{\rtf1\ansi\ansicpg1252\deff0\nouicompat\deflang1033{\fonttbl{\f0\fnil\fcharset0 Calibri;}}
+{\colortbl ;\red0\green0\blue255;}
+{\*\generator Riched20 10.0.19041}\viewkind4\uc1 
+\pard\sa200\sl276\slmult1\f0\fs22\lang9 In [1]:\par
+import pandas as pd\par
+import numpy as np\par
+import seaborn as sns\par
+import matplotlib.pyplot as plt\par
+from sklearn.model_selection import train_test_split\par
+from pandas.plotting import parallel_coordinates\par
+from sklearn.tree import DecisionTreeClassifier, plot_tree\par
+from sklearn import metrics\par
+from sklearn.naive_bayes import GaussianNB\par
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis\par
+from sklearn.neighbors import KNeighborsClassifier\par
+from sklearn.svm import SVC\par
+from sklearn.linear_model import LogisticRegression\par
+In [2]:\par
+# load through url\par
+url = '{{\field{\*\fldinst{HYPERLINK http://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data }}{\fldrslt{http://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data\ul0\cf0}}}}\f0\fs22 '\par
+attributes = ["sepal_length", "sepal_width", "petal_length", "petal_width", "class"]\par
+dataset = pd.read_csv(url, names = attributes)\par
+dataset.columns = attributes\par
+In [3]:\par
+dataset\par
+Out[3]:\par
+sepal_length\tab sepal_width\tab petal_length\tab petal_width\tab class\par
+0\tab 5.1\tab 3.5\tab 1.4\tab 0.2\tab Iris-setosa\par
+1\tab 4.9\tab 3.0\tab 1.4\tab 0.2\tab Iris-setosa\par
+2\tab 4.7\tab 3.2\tab 1.3\tab 0.2\tab Iris-setosa\par
+3\tab 4.6\tab 3.1\tab 1.5\tab 0.2\tab Iris-setosa\par
+4\tab 5.0\tab 3.6\tab 1.4\tab 0.2\tab Iris-setosa\par
+...\tab ...\tab ...\tab ...\tab ...\tab ...\par
+145\tab 6.7\tab 3.0\tab 5.2\tab 2.3\tab Iris-virginica\par
+146\tab 6.3\tab 2.5\tab 5.0\tab 1.9\tab Iris-virginica\par
+147\tab 6.5\tab 3.0\tab 5.2\tab 2.0\tab Iris-virginica\par
+148\tab 6.2\tab 3.4\tab 5.4\tab 2.3\tab Iris-virginica\par
+149\tab 5.9\tab 3.0\tab 5.1\tab 1.8\tab Iris-virginica\par
+150 rows \'d7 5 columns\par
+\par
+In [4]:\par
+# or load through local csv\par
+data = pd.read_csv('data.csv')\par
+In [5]:\par
+data.head(5)\par
+Out[5]:\par
+sepal_length\tab sepal_width\tab petal_length\tab petal_width\tab species\par
+0\tab 5.1\tab 3.5\tab 1.4\tab 0.2\tab setosa\par
+1\tab 4.9\tab 3.0\tab 1.4\tab 0.2\tab setosa\par
+2\tab 4.7\tab 3.2\tab 1.3\tab 0.2\tab setosa\par
+3\tab 4.6\tab 3.1\tab 1.5\tab 0.2\tab setosa\par
+4\tab 5.0\tab 3.6\tab 1.4\tab 0.2\tab setosa\par
+In [6]:\par
+# types for the columns\par
+data.dtypes\par
+Out[6]:\par
+sepal_length    float64\par
+sepal_width     float64\par
+petal_length    float64\par
+petal_width     float64\par
+species          object\par
+dtype: object\par
+In [7]:\par
+# numerical summary, only applies to numerical columns\par
+data.describe()\par
+Out[7]:\par
+sepal_length\tab sepal_width\tab petal_length\tab petal_width\par
+count\tab 150.000000\tab 150.000000\tab 150.000000\tab 150.000000\par
+mean\tab 5.843333\tab 3.054000\tab 3.758667\tab 1.198667\par
+std\tab 0.828066\tab 0.433594\tab 1.764420\tab 0.763161\par
+min\tab 4.300000\tab 2.000000\tab 1.000000\tab 0.100000\par
+25%\tab 5.100000\tab 2.800000\tab 1.600000\tab 0.300000\par
+50%\tab 5.800000\tab 3.000000\tab 4.350000\tab 1.300000\par
+75%\tab 6.400000\tab 3.300000\tab 5.100000\tab 1.800000\par
+max\tab 7.900000\tab 4.400000\tab 6.900000\tab 2.500000\par
+In [8]:\par
+# number of instances in each class\par
+data.groupby('species').size()\par
+Out[8]:\par
+species\par
+setosa        50\par
+versicolor    50\par
+virginica     50\par
+dtype: int64\par
+In [9]:\par
+# Take out a test set\par
+train, test = train_test_split(data, test_size = 0.4, stratify = data['species'], random_state = 42)\par
+In [10]:\par
+# number of instances in each class in training data\par
+train.groupby('species').size()\par
+Out[10]:\par
+species\par
+setosa        30\par
+versicolor    30\par
+virginica     30\par
+dtype: int64\par
+In [11]:\par
+# histograms\par
+n_bins = 10\par
+fig, axs = plt.subplots(2, 2)\par
+axs[0,0].hist(train['sepal_length'], bins = n_bins);\par
+axs[0,0].set_title('Sepal Length');\par
+axs[0,1].hist(train['sepal_width'], bins = n_bins);\par
+axs[0,1].set_title('Sepal Width');\par
+axs[1,0].hist(train['petal_length'], bins = n_bins);\par
+axs[1,0].set_title('Petal Length');\par
+axs[1,1].hist(train['petal_width'], bins = n_bins);\par
+axs[1,1].set_title('Petal Width');\par
+\par
+# add some spacing between subplots\par
+fig.tight_layout(pad=1.0);\par
+\par
+In [12]:\par
+# boxplots using seaborn\par
+fig, axs = plt.subplots(2, 2)\par
+fn = ["sepal_length", "sepal_width", "petal_length", "petal_width"]\par
+cn = ['setosa', 'versicolor', 'virginica']\par
+sns.boxplot(x = 'species', y = 'sepal_length', data = train, order = cn, ax = axs[0,0]);\par
+sns.boxplot(x = 'species', y = 'sepal_width', data = train, order = cn, ax = axs[0,1]);\par
+sns.boxplot(x = 'species', y = 'petal_length', data = train, order = cn, ax = axs[1,0]);\par
+sns.boxplot(x = 'species', y = 'petal_width', data = train,  order = cn, ax = axs[1,1]);\par
+# add some spacing between subplots\par
+fig.tight_layout(pad=1.0);\par
+\par
+In [13]:\par
+# right off the bat, we see that petal length/width can separate setosa from the others\par
+# histogram by species\par
+setosa_pl = train.loc[train.species=='setosa', 'petal_length']\par
+versicolor_pl = train.loc[train.species=='versicolor', 'petal_length']\par
+virginica_pl = train.loc[train.species=='virginica', 'petal_length']\par
+setosa_pw = train.loc[train.species=='setosa', 'petal_width']\par
+versicolor_pw = train.loc[train.species=='versicolor', 'petal_width']\par
+virginica_pw = train.loc[train.species=='virginica', 'petal_width']\par
+\par
+fig, axs = plt.subplots(1, 2)\par
+# set figure size\par
+fig.set_size_inches(10,4)\par
+ax1 = sns.distplot(setosa_pl, color="blue", label="Setosa", ax = axs[0]);\par
+ax1.set_title('Petal Length By Species')\par
+ax1 = sns.distplot(versicolor_pl, color="red", label="Versicolor", ax = axs[0]);\par
+ax1 = sns.distplot(virginica_pl, color="green", label="Virginica", ax = axs[0]);\par
+\par
+ax2 = sns.distplot(setosa_pw, color="blue", label="Setosa", ax = axs[1]);\par
+ax2.set_title('Petal Width By Species')\par
+ax2 = sns.distplot(versicolor_pw, color="red", label="Versicolor", ax = axs[1]);\par
+ax2 = sns.distplot(virginica_pw, color="green", label="Virginica", ax = axs[1]);\par
+\par
+plt.legend();\par
+\par
+In [14]:\par
+sns.violinplot(x="species", y="petal_length", data=train, size=5, order = cn, palette = 'colorblind');\par
+\par
+In [15]:\par
+# bivariate relationship\par
+# scatterplot matrix\par
+sns.pairplot(train, hue="species", height = 2, palette = 'colorblind');\par
+\par
+In [16]:\par
+# correlation matrix\par
+corrmat = train.corr()\par
+sns.heatmap(corrmat, annot = True, square = True);\par
+\par
+In [17]:\par
+# parallel coordinates\par
+parallel_coordinates(train, "species", color = ['blue', 'red', 'green']);\par
+\par
+In [18]:\par
+# Model development\par
+X_train = train[['sepal_length','sepal_width','petal_length','petal_width']]\par
+y_train = train.species\par
+X_test = test[['sepal_length','sepal_width','petal_length','petal_width']]\par
+y_test = test.species\par
+In [19]:\par
+# first try decision tree\par
+mod_dt = DecisionTreeClassifier(max_depth = 3, random_state = 1)\par
+mod_dt.fit(X_train,y_train)\par
+prediction=mod_dt.predict(X_test)\par
+print('The accuracy of the Decision Tree is',"\{:.3f\}".format(metrics.accuracy_score(prediction,y_test)))\par
+The accuracy of the Decision Tree is 0.983\par
+In [20]:\par
+mod_dt.feature_importances_\par
+Out[20]:\par
+array([0.        , 0.        , 0.42430866, 0.57569134])\par
+In [21]:\par
+# set figure size\par
+plt.figure(figsize = (10,8))\par
+plot_tree(mod_dt, feature_names = fn, class_names = cn, filled = True);\par
+\par
+In [22]:\par
+# plot decision boundary for pedal width vs pedal length\par
+plot_step = 0.01\par
+plot_colors = "ryb"\par
+xx, yy = np.meshgrid(np.arange(0, 7, plot_step), np.arange(0, 3, plot_step))\par
+plt.tight_layout(h_pad=1, w_pad=1, pad=2.5)\par
+\par
+selected_predictors = ["petal_length", "petal_width"]\par
+mod_dt_1 = DecisionTreeClassifier(max_depth = 3, random_state = 1)\par
+y_train_en = y_train.replace(\{'setosa':0,'versicolor':1,'virginica':2\}).copy()\par
+mod_dt_1.fit(X_train[selected_predictors],y_train_en)\par
+\par
+pred_all = mod_dt_1.predict(np.c_[xx.ravel(), yy.ravel()])\par
+pred_all = pred_all.reshape(xx.shape)\par
+\par
+graph = plt.contourf(xx, yy, pred_all, cmap=plt.cm.RdYlBu)\par
+\par
+plt.xlabel(selected_predictors[0])\par
+plt.ylabel(selected_predictors[1])\par
+\par
+# plot test data points\par
+n_class = 3\par
+for i, color in zip(cn, plot_colors):\par
+    temp = np.where(y_test == i)\par
+    idx = [elem for elems in temp for elem in elems]\par
+    plt.scatter(X_test.iloc[idx, 2], X_test.iloc[idx, 3], c=color, \par
+                label=y_test, cmap=plt.cm.RdYlBu, edgecolor='black', s=20)\par
+\par
+plt.suptitle("Decision Boundary Shown in 2D with Test Data")\par
+plt.axis("tight");\par
+\par
+In [23]:\par
+# confusion matrix\par
+# one versicolor misclassified\par
+disp = metrics.plot_confusion_matrix(mod_dt, X_test, y_test,\par
+                                 display_labels=cn,\par
+                                 cmap=plt.cm.Blues,\par
+                                 normalize=None)\par
+disp.ax_.set_title('Decision Tree Confusion matrix, without normalization');\par
+\par
+In [24]:\par
+# Guassian Naive Bayes Classifier\par
+mod_gnb_all = GaussianNB()\par
+y_pred = mod_gnb_all.fit(X_train, y_train).predict(X_test)\par
+print('The accuracy of the Guassian Naive Bayes Classifier on test data is',"\{:.3f\}".format(metrics.accuracy_score(y_pred,y_test)))\par
+The accuracy of the Guassian Naive Bayes Classifier on test data is 0.933\par
+In [25]:\par
+# Guassian Naive Bayes Classifier with two predictors\par
+mod_gnb = GaussianNB()\par
+y_pred = mod_gnb.fit(X_train[selected_predictors], y_train).predict(X_test[selected_predictors])\par
+print('The accuracy of the Guassian Naive Bayes Classifier with 2 predictors on test data is',"\{:.3f\}".format(metrics.accuracy_score(y_pred,y_test)))\par
+The accuracy of the Guassian Naive Bayes Classifier with 2 predictors on test data is 0.950\par
+In [26]:\par
+# LDA Classifier\par
+mod_lda_all = LinearDiscriminantAnalysis()\par
+y_pred = mod_lda_all.fit(X_train, y_train).predict(X_test)\par
+print('The accuracy of the LDA Classifier on test data is',"\{:.3f\}".format(metrics.accuracy_score(y_pred,y_test)))\par
+The accuracy of the LDA Classifier on test data is 0.983\par
+In [27]:\par
+# LDA Classifier with two predictors\par
+mod_lda = LinearDiscriminantAnalysis()\par
+y_pred = mod_lda.fit(X_train[selected_predictors], y_train).predict(X_test[selected_predictors])\par
+print('The accuracy of the LDA Classifier with two predictors on test data is',"\{:.3f\}".format(metrics.accuracy_score(y_pred,y_test)))\par
+The accuracy of the LDA Classifier with two predictors on test data is 0.933\par
+In [28]:\par
+# LDA with 2 predictors\par
+mod_lda_1 = LinearDiscriminantAnalysis()\par
+y_pred = mod_lda_1.fit(X_train[selected_predictors], y_train_en).predict(X_test[selected_predictors])\par
+\par
+N = 300\par
+X = np.linspace(0, 7, N)\par
+Y = np.linspace(0, 3, N)\par
+X, Y = np.meshgrid(X, Y)\par
+\par
+g = sns.FacetGrid(test, hue="species", height=5, palette = 'colorblind').map(plt.scatter,"petal_length", "petal_width", ).add_legend()\par
+my_ax = g.ax\par
+\par
+zz = np.array([mod_lda_1.predict(np.array([[xx,yy]])) for xx, yy in zip(np.ravel(X), np.ravel(Y)) ] )\par
+Z = zz.reshape(X.shape)\par
+\par
+#Plot the filled and boundary contours\par
+my_ax.contourf( X, Y, Z, 2, alpha = .1, colors = ('blue','green','red'))\par
+my_ax.contour( X, Y, Z, 2, alpha = 1, colors = ('blue','green','red'))\par
+\par
+# Add axis and title\par
+my_ax.set_xlabel('Petal Length')\par
+my_ax.set_ylabel('Petal Width')\par
+my_ax.set_title('LDA Decision Boundaries with Test Data');\par
+\par
+In [29]:\par
+# QDA Classifier\par
+mod_qda_all = QuadraticDiscriminantAnalysis()\par
+y_pred = mod_qda_all.fit(X_train, y_train).predict(X_test)\par
+print('The accuracy of the QDA Classifier is',"\{:.3f\}".format(metrics.accuracy_score(y_pred,y_test)))\par
+The accuracy of the QDA Classifier is 0.983\par
+In [30]:\par
+# QDA Classifier with two predictors\par
+mod_qda = QuadraticDiscriminantAnalysis()\par
+y_pred = mod_qda.fit(X_train[selected_predictors], y_train).predict(X_test[selected_predictors])\par
+print('The accuracy of the QDA Classifier with two predictors is',"\{:.3f\}".format(metrics.accuracy_score(y_pred,y_test)))\par
+The accuracy of the QDA Classifier with two predictors is 0.967\par
+In [31]:\par
+# QDA with 2 predictors\par
+mod_qda_1 = QuadraticDiscriminantAnalysis()\par
+y_pred = mod_qda_1.fit(X_train.iloc[:,2:4], y_train_en).predict(X_test.iloc[:,2:4])\par
+\par
+N = 300\par
+X = np.linspace(0, 7, N)\par
+Y = np.linspace(0, 3, N)\par
+X, Y = np.meshgrid(X, Y)\par
+\par
+g = sns.FacetGrid(test, hue="species", height=5, palette = 'colorblind').map(plt.scatter,"petal_length", "petal_width", ).add_legend()\par
+my_ax = g.ax\par
+\par
+zz = np.array([mod_qda_1.predict(np.array([[xx,yy]])) for xx, yy in zip(np.ravel(X), np.ravel(Y)) ] )\par
+Z = zz.reshape(X.shape)\par
+\par
+#Plot the filled and boundary contours\par
+my_ax.contourf( X, Y, Z, 2, alpha = .1, colors = ('blue','green','red'))\par
+my_ax.contour( X, Y, Z, 2, alpha = 1, colors = ('blue','green','red'))\par
+\par
+# Addd axis and title\par
+my_ax.set_xlabel('Petal Length')\par
+my_ax.set_ylabel('Petal Width')\par
+my_ax.set_title('QDA Decision Boundaries with Test Data');\par
+\par
+In [32]:\par
+# KNN, first try 5\par
+mod_5nn=KNeighborsClassifier(n_neighbors=5) \par
+mod_5nn.fit(X_train,y_train)\par
+prediction=mod_5nn.predict(X_test)\par
+print('The accuracy of the 5NN Classifier is',"\{:.3f\}".format(metrics.accuracy_score(prediction,y_test)))\par
+The accuracy of the 5NN Classifier is 0.933\par
+In [33]:\par
+# try different k\par
+acc_s = pd.Series(dtype = 'float')\par
+for i in list(range(1,11)):\par
+    mod_knn=KNeighborsClassifier(n_neighbors=i) \par
+    mod_knn.fit(X_train,y_train)\par
+    prediction=mod_knn.predict(X_test)\par
+    acc_s = acc_s.append(pd.Series(metrics.accuracy_score(prediction,y_test)))\par
+    \par
+plt.plot(list(range(1,11)), acc_s)\par
+plt.suptitle("Test Accuracy vs K")\par
+plt.xticks(list(range(1,11)))\par
+plt.ylim(0.9,0.98);\par
+\par
+In [34]:\par
+# SVC with linear kernel\par
+# for SVC, may be impractical beyond tens of thousands of samples\par
+linear_svc = SVC(kernel='linear').fit(X_train, y_train)\par
+prediction=linear_svc.predict(X_test)\par
+print('The accuracy of the linear SVC is',"\{:.3f\}".format(metrics.accuracy_score(prediction,y_test)))\par
+The accuracy of the linear SVC is 1.000\par
+In [35]:\par
+# SVC with polynomial kernel\par
+poly_svc = SVC(kernel='poly', degree = 4).fit(X_train, y_train)\par
+prediction=poly_svc.predict(X_test)\par
+print('The accuracy of the Poly SVC is',"\{:.3f\}".format(metrics.accuracy_score(prediction,y_test)))\par
+The accuracy of the Poly SVC is 0.933\par
+In [36]:\par
+# Logistic regression\par
+mod_lr = LogisticRegression(solver = 'newton-cg').fit(X_train, y_train)\par
+prediction=mod_lr.predict(X_test)\par
+print('The accuracy of the Logistic Regression is',"\{:.3f\}".format(metrics.accuracy_score(prediction,y_test)))\par
+The accuracy of the Logistic Regression is 0.950\par
+In [ ]:\par
+}
+ 
